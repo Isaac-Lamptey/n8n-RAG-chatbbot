@@ -1,0 +1,373 @@
+{
+  "name": "RAG knowledge base workflow for 24/7 customer support",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.message }}",
+        "options": {
+          "systemMessage": "You are a helpful and professional AI support assistant for a company named CloudSync Operations.\nYour primary responsibility is to answer questions using ONLY the provided knowledge base and the current conversation history.  Use the provided context as the absolute source of truth. If the answer requires an inference (e.g., matching a feature to a plan), state it definitively based on the provided data. Do not use phrases like 'it appears' or 'it can be inferred.' If the information exists in the context, provide the answer directly.\"\n\nGENERAL BEHAVIOR\n\n- Be friendly, natural, and conversational.\n- Respond appropriately to greetings, farewells, thanks, apologies, and other social messages without requiring information from the knowledge base.\n- Maintain conversation context and understand follow-up questions.\n- Do not be confused by messy or long chat history. Focus on the user's latest message while using previous messages only when relevant.\n\nKNOWLEDGE RULES\n\n1. If the answer is explicitly present in the retrieved context, answer directly without mentioning that it came from the knowledge base.\n\n2. If the answer can be logically derived from the retrieved information (such as comparisons, calculations, limits, pricing differences, or feature differences), you may infer it, but only from the provided context.\n\n3. When summarizing or comparing information that exists in the retrieved context, present it clearly using tables or bullet points when appropriate.\n\n4. If the required information is genuinely missing and cannot be derived from the retrieved context, respond exactly:\n\n\"I don't have enough information in the knowledge base to answer that.\"\n\n5. Never use outside knowledge, assumptions, or invented details.\n\n6. Never fabricate steps, policies, links, processes, or recommendations that are not supported by the retrieved context.\n\n7. If the user asks a question unrelated to the documented product or services, politely respond:\n\n\"I don't have enough information in the knowledge base to answer that.\"\n\n8. Keep answers concise unless the user requests more detail.\n\n9. Include only information relevant to the user's question."
+        }
+      },
+      "id": "bf24b0bb-6bf3-4e8d-a86e-7cd5687148be",
+      "name": "Knowledge Base Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -352,
+        48
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Receive user message').item.json.body.session_id }}",
+        "contextWindowLength": 3
+      },
+      "id": "b7fc53fd-918e-483d-b1ef-2082e347dadc",
+      "name": "Sliding Window Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        -320,
+        272
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "productDocs",
+        "toolDescription": "Retrieve relevant official company documentation and FAQs.",
+        "mongoCollection": {
+          "__rl": true,
+          "mode": "list",
+          "value": "n8n-template"
+        },
+        "vectorIndexName": "data_index",
+        "options": {}
+      },
+      "id": "2d2e5337-6186-4f19-9741-f00257284699",
+      "name": "MongoDB Vector Search",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreMongoDBAtlas",
+      "position": [
+        -304,
+        544
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "doc_id",
+                "value": "http_url_upload"
+              }
+            ]
+          }
+        }
+      },
+      "id": "ff98d2ab-0c07-44cc-ae61-0b85ba5afeaf",
+      "name": "Document Section Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        1264,
+        288
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "chunkSize": 512,
+        "chunkOverlap": 50,
+        "options": {
+          "splitCode": "markdown"
+        }
+      },
+      "id": "9f341fb6-bf49-46d5-b663-b10642584625",
+      "name": "Document Chunker",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "position": [
+        1264,
+        464
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "mongoCollection": {
+          "__rl": true,
+          "value": "n8n-template",
+          "mode": "list"
+        },
+        "vectorIndexName": "data_index",
+        "options": {}
+      },
+      "id": "c7a1d3ad-d562-4f57-90be-b419883a20eb",
+      "name": "Vector Store Inserter",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreMongoDBAtlas",
+      "position": [
+        1216,
+        64
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        256
+      ],
+      "id": "4a5c136b-8010-4aba-93cd-b25d4fcd654a",
+      "name": " Your AI Response model"
+      
+    },
+    {
+      "parameters": {},
+      "id": "99ae7582-c371-4f09-89eb-cb523225a372",
+      "name": "trigger for injection",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        320,
+        64
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "Your_document's_URL",
+        "options": {}
+      },
+      "id": "5fecf130-f9a7-4d0c-afde-f91d08592d89",
+      "name": "get file from database/URL",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        624,
+        64
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "operation": "pdfToText"
+      },
+      "type": "@custom-js/n8n-nodes-pdf-toolkit-v2.pdfToolkit",
+      "typeVersion": 1,
+      "position": [
+        864,
+        64
+      ],
+      "id": "69970950-a6fb-4e2f-a10d-5f0bc02cb5ba",
+      "name": "parse the document",
+      "credentials": {
+        "customJsApi": {
+          "id": "Xhua0xdMMXkkszOf",
+          "name": "CustomJS account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"response\": {{ JSON.stringify($json.output) }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        48
+      ],
+      "id": "84d1881f-25d7-42dc-ba28-679dd8878a59",
+      "name": "User response"
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        320,
+        752
+      ],
+      "id": "cfbf6d11-626e-4651-a8d1-637b16d541d4",
+      "name": "embedding model"
+      
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -672,
+        48
+      ],
+      "id": "94b0abb8-c10a-4381-b4d7-459631cccd07",
+      "name": "Receive user message",
+      "webhookId": "f8a337f2-ed32-4eee-89b6-20de06139714"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Sliding Window Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Knowledge Base Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Document Chunker": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Document Section Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MongoDB Vector Search": {
+      "ai_tool": [
+        [
+          {
+            "node": "Knowledge Base Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Document Section Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Vector Store Inserter",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Knowledge Base Agent": {
+      "main": [
+        [
+          {
+            "node": "User response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Knowledge Base Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Inserter": {
+      "main": [
+        []
+      ]
+    },
+    "trigger for injection": {
+      "main": [
+        [
+          {
+            "node": "get file from database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get file from database": {
+      "main": [
+        [
+          {
+            "node": "parse the document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse the document": {
+      "main": [
+        [
+          {
+            "node": "Vector Store Inserter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "embedding model": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Vector Store Inserter",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "MongoDB Vector Search",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive user message": {
+      "main": [
+        [
+          {
+            "node": "Knowledge Base Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "Africa/Accra",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "78e6c9a1-b2f7-47a5-823a-c3025a937ef8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "168679d82a801f6c1c067a375187b5ef0765587603550b55044aee0d399afd40"
+  },
+  "id": "7QZm9UhUAOJLCEfi",
+  "tags": []
+}
