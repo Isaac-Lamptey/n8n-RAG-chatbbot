@@ -1,7 +1,7 @@
 
 
 # RAG Knowledge Base Chatbot with n8n
-<img width="200" height="200" alt="image" src="https://github.com/user-attachments/assets/2a0212f8-a95c-4d9b-ba07-916a8926802f" />
+<img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/2a0212f8-a95c-4d9b-ba07-916a8926802f" />
 
 ## Overview
 
