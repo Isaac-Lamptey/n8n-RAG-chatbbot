@@ -1,7 +1,7 @@
-<img width="883" height="859" alt="image" src="https://github.com/user-attachments/assets/2a0212f8-a95c-4d9b-ba07-916a8926802f" />
+
 
 # RAG Knowledge Base Chatbot with n8n
-
+<img width="400" height="500" alt="image" src="https://github.com/user-attachments/assets/2a0212f8-a95c-4d9b-ba07-916a8926802f" />
 ## Overview
 
 This project demonstrates a modular Retrieval-Augmented Generation (RAG) support agent built with **n8n** and **MongoDB Vector Search**.
