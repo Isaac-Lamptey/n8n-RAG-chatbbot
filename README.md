@@ -1,28 +1,111 @@
-RAG Chatbot Architecture
-This repository contains a modular n8n workflow for a RAG knowledge base support agent, built to ensure hallucination-free responses by scoping an LLM strictly to provided documentation.
 
+# RAG Knowledge Base Chatbot with n8n
 
-Key Components
-Orchestration: n8n
+## Overview
 
-Vector Storage: mongoDB vector store
+This project demonstrates a modular Retrieval-Augmented Generation (RAG) support agent built with **n8n** and **MongoDB Vector Search**.
 
-Logic: Custom RAG pipeline ensuring data integrity and restricted context retrieval.
+The goal is to enable AI assistants to answer questions using only approved business documentation, reducing unsupported responses by grounding every answer in retrieved context from the knowledge base.
 
-How to Use:
-Import Sanitized_workflow.json into your n8n instance.
+The architecture is designed to be modular, extensible, and suitable for customer support, internal knowledge bases, and document-driven AI assistants.
 
-Configure your environment variables(credentials) for mongoDB and your chosen LLM.
+---
 
-Connect your vector store to the retrieval node.
+## Features
 
-4. Commit and Push
-In your terminal, run:
+* Retrieval-Augmented Generation (RAG)
+* Modular n8n workflow architecture
+* MongoDB Vector Store integration
+* Semantic document retrieval
+* Context-aware response generation
+* Restricts responses to retrieved knowledge
+* Easily adaptable to PDF and document-based support systems
+* Compatible with OpenAI-compatible language models
 
-Bash
-git init
-git add .
-git commit -m "Initial commit: Modular RAG chatbot architecture for client evaluation"
-git branch -M main
-git remote add origin [YOUR_GITHUB_REPO_URL]
-git push -u origin main
+---
+
+## Architecture
+
+```
+                User Query
+                     │
+                     ▼
+             n8n Orchestration
+                     │
+         ┌───────────┴───────────┐
+         │                       │
+         ▼                       ▼
+Generate Embedding      Workflow Logic
+         │
+         ▼
+MongoDB Vector Store
+         │
+         ▼
+Relevant Context Retrieval
+         │
+         ▼
+      Language Model
+         │
+         ▼
+ Grounded AI Response
+```
+
+---
+
+## Technology Stack
+
+* n8n
+* MongoDB Vector Store
+* OpenAI-compatible LLM
+* Vector Embeddings
+* REST APIs
+* Retrieval-Augmented Generation (RAG)
+
+---
+
+## Workflow Design Goals
+
+The workflow is designed to:
+
+* Retrieve only relevant knowledge before generation
+* Improve factual consistency by grounding responses in stored documents
+* Maintain a modular architecture for easy customization
+* Support scalable automation pipelines and future integrations
+
+---
+
+## Setup
+
+1. Import `Sanitized_workflow.json` into your n8n instance.
+2. Configure your MongoDB credentials.
+3. Configure your preferred LLM provider.
+4. Connect your vector store.
+5. Execute the workflow.
+
+---
+
+## Repository Contents
+
+* `Sanitized_workflow.json` — Sanitized n8n workflow
+* `README.md` — Project documentation
+
+---
+
+## Future Enhancements
+
+* Multi-document support
+* Source citation display
+* Metadata filtering
+* Hybrid retrieval
+* Reranking
+* Role-based document access
+* Conversation memory
+* Advanced analytics
+
+---
+
+## Author
+
+**Isaac Lamptey**
+
+AI Automation Developer specializing in **n8n**, **OpenAI integrations**, and **Retrieval-Augmented Generation (RAG)** systems.
