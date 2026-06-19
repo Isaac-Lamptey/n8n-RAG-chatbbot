@@ -1,5 +1,5 @@
 RAG Chatbot Architecture
-This repository contains a modular n8n workflow for a RAG-based knowledge base agent, built to ensure hallucination-free responses by scoping an LLM strictly to provided documentation.
+This repository contains a modular n8n workflow for a RAG knowledge base support agent, built to ensure hallucination-free responses by scoping an LLM strictly to provided documentation.
 
 
 Key Components
@@ -10,7 +10,7 @@ Vector Storage: mongoDB vector store
 Logic: Custom RAG pipeline ensuring data integrity and restricted context retrieval.
 
 How to Use:
-Import workflow.json into your n8n instance.
+Import Sanitized_workflow.json into your n8n instance.
 
 Configure your environment variables(credentials) for mongoDB and your chosen LLM.
 
